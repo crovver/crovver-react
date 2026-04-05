@@ -37,9 +37,10 @@ function App() {
     <CrovverProvider
       config={{
         publicKey: "pk_live_xxx", // Your Crovver public API key
-        tenantId: "your-user-or-org-id", // The current customer's ID in your system
+        tenantId: "your-org-id", // The current customer's ID in your system
+        userId: "your-user-id", // The logged-in user's ID in your system
         apiUrl: "https://api.crovver.com", // Your Crovver API URL
-        ecomUrl: "https://ecom.crovver.com", // Crovver checkout app URL
+        portalUrl: "https://portal.crovver.com", // Crovver portal URL
       }}
     >
       <YourApp />
@@ -112,14 +113,21 @@ Root provider. Wrap your app (or the section that needs subscription awareness) 
   config={{
     publicKey: string;       // Required. Starts with pk_live_ or pk_test_
     tenantId: string;        // Required. Your customer's ID in your system
+    userId: string;          // Recommended. Stable user ID for deduplicating records
     pollInterval?: number;   // Optional. Auto-refresh interval in ms
     debug?: boolean;         // Optional. Logs SDK activity to console
     onUnauthenticated?: () => void;  // Optional. Called when subscription is inactive
+    metadata?: {             // Optional. Extra context for checkout/portal tokens
+      userEmail?: string;
+      userName?: string;
+    };
   }}
 >
   {children}
 </CrovverProvider>
 ```
+
+**`userId`** is the ID of the currently logged-in user in your system. It is used by Crovver to deduplicate `tenant_owner` records across checkout sessions. Pass it at the top level — `metadata.userId` still works but is deprecated.
 
 ---
 
@@ -372,15 +380,18 @@ import { CrovverProvider } from "@crovver/react-sdk";
 export function Providers({
   children,
   tenantId,
+  userId,
 }: {
   children: React.ReactNode;
   tenantId: string;
+  userId: string;
 }) {
   return (
     <CrovverProvider
       config={{
         publicKey: process.env.NEXT_PUBLIC_CROVVER_PUBLIC_KEY!,
         tenantId,
+        userId,
       }}
     >
       {children}
@@ -398,7 +409,9 @@ export default async function RootLayout({ children }) {
   return (
     <html>
       <body>
-        <Providers tenantId={session.orgId}>{children}</Providers>
+        <Providers tenantId={session.orgId} userId={session.userId}>
+          {children}
+        </Providers>
       </body>
     </html>
   );
@@ -415,7 +428,8 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <CrovverProvider
     config={{
       publicKey: import.meta.env.VITE_CROVVER_PUBLIC_KEY,
-      tenantId: currentUser.id,
+      tenantId: currentUser.orgId,
+      userId: currentUser.id,
     }}
   >
     <App />

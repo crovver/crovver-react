@@ -26,11 +26,13 @@ export interface CrovverProviderProps {
     debug?: boolean;
     /** Callback when authentication fails (optional) */
     onUnauthenticated?: () => void;
+    /** Stable user ID from the caller for deduplicating tenant_owners records */
+    userId?: string;
     /** Metadata to attach to checkout/portal token requests (e.g. org email and name) */
     metadata?: {
       userEmail?: string;
       userName?: string;
-      /** Stable user ID from the caller for deduplicating tenant_owners records */
+      /** @deprecated Pass userId at the top level instead */
       userId?: string;
     };
   };
@@ -46,8 +48,11 @@ export function CrovverProvider({ children, config }: CrovverProviderProps) {
     pollInterval,
     debug = false,
     onUnauthenticated,
+    userId: userIdProp,
     metadata,
   } = config;
+
+  const userId = userIdProp ?? metadata?.userId;
 
   // State
   const [subscription, setSubscription] = useState<SubscriptionStatus | null>(
@@ -144,6 +149,7 @@ export function CrovverProvider({ children, config }: CrovverProviderProps) {
             },
             body: JSON.stringify({
               externalTenantId: tenantId,
+              externalUserId: userId,
               returnUrl: window.location.href,
               requiredFeature: options?.requiredFeature,
               requiredPlan: options?.requiredPlan,
@@ -172,7 +178,7 @@ export function CrovverProvider({ children, config }: CrovverProviderProps) {
         window.location.href = `${portalUrl}/pricing`;
       }
     },
-    [tenantId, portalUrl, apiUrl, publicKey]
+    [tenantId, portalUrl, apiUrl, publicKey, userId, metadata]
   );
 
   /**
