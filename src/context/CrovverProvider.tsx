@@ -16,6 +16,8 @@ export interface CrovverProviderProps {
     publicKey: string;
     /** The tenant ID to check subscriptions for */
     tenantId: string;
+    /** The tenant name to display in the UI */
+    tenantName?: string;
     /** Crovver API URL (optional, defaults to http://localhost:3000) */
     apiUrl?: string;
     /** E-commerce checkout URL (optional, defaults to http://localhost:3002) */
@@ -50,6 +52,7 @@ export function CrovverProvider({ children, config }: CrovverProviderProps) {
     onUnauthenticated,
     userId: userIdProp,
     metadata,
+    tenantName,
   } = config;
 
   const userId = userIdProp ?? metadata?.userId;
@@ -150,6 +153,7 @@ export function CrovverProvider({ children, config }: CrovverProviderProps) {
             body: JSON.stringify({
               externalTenantId: tenantId,
               externalUserId: userId,
+              externalTenantName: tenantName,
               returnUrl: window.location.href,
               requiredFeature: options?.requiredFeature,
               requiredPlan: options?.requiredPlan,
@@ -195,6 +199,7 @@ export function CrovverProvider({ children, config }: CrovverProviderProps) {
         },
         body: JSON.stringify({
           externalTenantId: tenantId,
+          externalTenantName: tenantName,
           returnUrl: window.location.href,
           metadata,
         }),

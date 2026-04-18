@@ -114,6 +114,7 @@ Root provider. Wrap your app (or the section that needs subscription awareness) 
     publicKey: string;       // Required. Starts with pk_live_ or pk_test_
     tenantId: string;        // Required. Your customer's ID in your system
     userId: string;          // Recommended. Stable user ID for deduplicating records
+    tenantName?: string;     // Optional. Display name for the tenant (org/workspace name)
     pollInterval?: number;   // Optional. Auto-refresh interval in ms
     debug?: boolean;         // Optional. Logs SDK activity to console
     onUnauthenticated?: () => void;  // Optional. Called when subscription is inactive
