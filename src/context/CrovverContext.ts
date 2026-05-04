@@ -33,15 +33,40 @@ export interface CrovverContextValue {
 
 export const CrovverContext = createContext<CrovverContextValue | null>(null);
 
+const NOOP = () => {};
+const NOOP_ASYNC = async () => {};
+
+/** Returned by useCrovverContext when called outside a CrovverProvider. */
+const NO_OP_CONTEXT: CrovverContextValue = {
+  config: {} as CrovverConfig,
+  client: {} as CrovverApiClient,
+  subscription: null,
+  isLoading: false,
+  error: null,
+  isActive: false,
+  hasFeature: () => false,
+  checkFeatureAccess: async () => false,
+  redirectToCheckout: NOOP,
+  redirectToPortal: NOOP,
+  refreshSubscription: NOOP_ASYNC,
+};
+
 /**
- * Hook to access Crovver context
- * Must be used within CrovverProvider
+ * Hook to access Crovver context.
+ * Safe to call anywhere in the React tree — returns no-op defaults when used
+ * outside a CrovverProvider so components don't need to guard the call site.
  */
 export function useCrovverContext(): CrovverContextValue {
   const context = useContext(CrovverContext);
 
   if (!context) {
-    throw new Error("useCrovverContext must be used within a CrovverProvider");
+    if (process.env.NODE_ENV === "development") {
+      console.warn(
+        "[crovver-react] useCrovverContext called outside CrovverProvider — " +
+          "billing functions will be no-ops until the provider mounts."
+      );
+    }
+    return NO_OP_CONTEXT;
   }
 
   return context;
