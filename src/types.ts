@@ -19,7 +19,7 @@ export interface CrovverConfig {
 
 export interface SubscriptionStatus {
   active: boolean;
-  status: "active" | "trialing" | "past_due" | "canceled" | "expired" | "none";
+  status: "active" | "trialing" | "trial" | "past_due" | "canceled" | "expired" | "none";
   tenant: {
     id: string;
     name: string;
@@ -27,7 +27,7 @@ export interface SubscriptionStatus {
   };
   subscription: {
     id: string;
-    status: string;
+    status: "active" | "trialing" | "trial" | "past_due" | "canceled" | "expired" | "none" ;
     trialEndsAt?: string;
     currentPeriodStart?: string;
     currentPeriodEnd?: string;
