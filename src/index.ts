@@ -16,7 +16,7 @@ export type { UseSubscriptionReturn } from "./hooks/useSubscription";
 export { useFeatureAccess } from "./hooks/useFeatureAccess";
 export type { UseFeatureAccessReturn } from "./hooks/useFeatureAccess";
 
-export { useBillingRedirect } from "./hooks/useBillingRedirect";
+export { useBillingRedirect, } from "./hooks/useBillingRedirect";
 export type { UseBillingRedirectReturn } from "./hooks/useBillingRedirect";
 
 // Components

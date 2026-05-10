@@ -201,6 +201,7 @@ export function SubscriptionBadge() {
 
   const statusColors = {
     active: "bg-green-100 text-green-800",
+    trial: "bg-blue-100 text-blue-800",
     trialing: "bg-blue-100 text-blue-800",
     past_due: "bg-yellow-100 text-yellow-800",
     canceled: "bg-red-100 text-red-800",
@@ -209,6 +210,7 @@ export function SubscriptionBadge() {
 
   const statusDotColors = {
     active: "bg-green-600",
+    trial: "bg-blue-600",
     trialing: "bg-blue-600",
     past_due: "bg-yellow-600",
     canceled: "bg-red-600",
