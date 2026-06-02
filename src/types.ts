@@ -19,7 +19,7 @@ export interface CrovverConfig {
 
 export interface SubscriptionStatus {
   active: boolean;
-  status: "active" | "trial" | "trialing" | "past_due" | "canceled" | "expired" | "none";
+  status: "active" | "trial" | "past_due" | "pending_cancel" | "canceled" | "expired" | "none";
   tenant: {
     id: string;
     name: string;
@@ -38,6 +38,9 @@ export interface SubscriptionStatus {
   plan: {
     id: string;
     name: string;
+    productId: string | null;
+    productName: string | null;
+    productSlug: string | null;
     billingInterval: string;
     features: string[];
     isSeatBased?: boolean;
@@ -47,7 +50,8 @@ export interface SubscriptionStatus {
 
 export interface FeatureAccessResult {
   canAccess: boolean;
-  featureKey: string;
+  featureKey?: string;
+  productSlug?: string;
   requestingEntityId: string;
 }
 
