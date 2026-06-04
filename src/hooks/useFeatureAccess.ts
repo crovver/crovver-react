@@ -1,10 +1,21 @@
 /**
  * useFeatureAccess Hook
- * Check if user has access to a specific feature
+ * Check if user has access to a specific feature or product
  */
 
 import { useState, useEffect, useCallback } from "react";
 import { useCrovverContext } from "../context/CrovverContext";
+
+export interface UseFeatureAccessOptions {
+  /** Whether to check via API instead of local plan data (default: false) */
+  checkRemote?: boolean;
+  /**
+   * Override the provider-level productSlug for this specific check.
+   * Use when a component needs to gate on a different product than the
+   * default set on CrovverProvider.
+   */
+  productSlug?: string;
+}
 
 export interface UseFeatureAccessReturn {
   /** Does user have access to this feature? */
@@ -22,36 +33,30 @@ export interface UseFeatureAccessReturn {
 }
 
 /**
- * Hook to check feature access
+ * Hook to check feature access or subscription existence.
  *
- * @param feature - Feature key to check
- * @param checkRemote - Whether to check via API (default: false)
+ * @param feature - Feature key to check. Optional when productSlug is provided
+ *   (omitting feature performs a subscription-existence check for the product).
+ * @param opts - Options: checkRemote, productSlug override
  *
  * @example
  * ```tsx
- * function AnalyticsPage() {
- *   const { hasAccess, isLoading, redirectToUpgrade } =
- *     useFeatureAccess('advanced-analytics');
+ * // Feature gate (local plan data)
+ * const { hasAccess } = useFeatureAccess('advanced-analytics');
  *
- *   if (isLoading) return <Spinner />;
+ * // Feature gate scoped to a product (remote)
+ * const { hasAccess } = useFeatureAccess('job-posting', { checkRemote: true, productSlug: 'ats' });
  *
- *   if (!hasAccess) {
- *     return (
- *       <PaywallCard
- *         feature="Advanced Analytics"
- *         onUpgrade={redirectToUpgrade}
- *       />
- *     );
- *   }
- *
- *   return <AdvancedAnalytics />;
- * }
+ * // Subscription-existence check for a product
+ * const { hasAccess: hasAts } = useFeatureAccess(undefined, { checkRemote: true, productSlug: 'ats' });
  * ```
  */
 export function useFeatureAccess(
-  feature: string,
-  checkRemote = false
+  feature?: string,
+  opts: UseFeatureAccessOptions = {}
 ): UseFeatureAccessReturn {
+  const { checkRemote = false, productSlug } = opts;
+
   const {
     hasFeature,
     checkFeatureAccess,
@@ -63,21 +68,17 @@ export function useFeatureAccess(
   const [hasAccess, setHasAccess] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  /**
-   * Check feature access (local or remote)
-   */
   const checkAccess = useCallback(async () => {
     setIsChecking(true);
     setError(null);
 
     try {
       if (checkRemote) {
-        // Check via API
-        const result = await checkFeatureAccess(feature);
+        const result = await checkFeatureAccess(feature, productSlug);
         setHasAccess(result);
       } else {
-        // Check locally
-        setHasAccess(hasFeature(feature));
+        // Local check only works when featureKey is present
+        setHasAccess(feature ? hasFeature(feature) : false);
       }
     } catch (err) {
       setError(
@@ -87,18 +88,12 @@ export function useFeatureAccess(
     } finally {
       setIsChecking(false);
     }
-  }, [feature, checkRemote, hasFeature, checkFeatureAccess]);
+  }, [feature, checkRemote, productSlug, hasFeature, checkFeatureAccess]);
 
-  /**
-   * Redirect to upgrade
-   */
   const redirectToUpgrade = useCallback(() => {
     redirectToCheckout({ requiredFeature: feature });
   }, [feature, redirectToCheckout]);
 
-  /**
-   * Check access on mount and when dependencies change
-   */
   useEffect(() => {
     if (!subscriptionLoading) {
       checkAccess();

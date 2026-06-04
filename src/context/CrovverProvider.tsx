@@ -28,6 +28,12 @@ export interface CrovverProviderProps {
     debug?: boolean;
     /** Callback when authentication fails (optional) */
     onUnauthenticated?: () => void;
+    /**
+     * Default product slug for all subscription and feature checks.
+     * Required when a tenant holds subscriptions to multiple products.
+     * Can be overridden per useFeatureAccess call.
+     */
+    productSlug?: string;
     /** Stable user ID from the caller for deduplicating tenant_owners records */
     userId?: string;
     /** Metadata to attach to checkout/portal token requests (e.g. org email and name) */
@@ -45,6 +51,7 @@ export function CrovverProvider({ children, config }: CrovverProviderProps) {
   const {
     publicKey,
     tenantId,
+    productSlug,
     apiUrl = CROVVER_URL.API,
     portalUrl = CROVVER_URL.PORTAL,
     pollInterval,
@@ -87,7 +94,7 @@ export function CrovverProvider({ children, config }: CrovverProviderProps) {
     setError(null);
 
     try {
-      const response = await client.getSubscriptionStatus();
+      const response = await client.getSubscriptionStatus(productSlug);
 
       if (response.success && response.data) {
         setSubscription(response.data);
@@ -123,15 +130,18 @@ export function CrovverProvider({ children, config }: CrovverProviderProps) {
    * Check feature access via API (more accurate than local check)
    */
   const checkFeatureAccess = useCallback(
-    async (feature: string): Promise<boolean> => {
+    async (feature?: string, slugOverride?: string): Promise<boolean> => {
       try {
-        const response = await client.checkFeatureAccess(feature);
+        const response = await client.checkFeatureAccess(
+          feature,
+          slugOverride ?? productSlug
+        );
         return response.success && response.data?.canAccess === true;
       } catch {
         return false;
       }
     },
-    [client]
+    [client, productSlug]
   );
 
   /**

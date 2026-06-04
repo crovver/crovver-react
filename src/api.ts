@@ -43,13 +43,11 @@ export class CrovverApiClient {
     this.log("Request:", url, options);
 
     try {
-      const headers: HeadersInit = {
-        ...options?.headers,
-      };
-
       const response = await fetch(url, {
         ...options,
-        headers,
+        headers: {
+          ...options?.headers,
+        },
       });
 
       const data: ApiResponse<T> = await response.json();
@@ -73,13 +71,19 @@ export class CrovverApiClient {
   }
 
   /**
-   * Get subscription status for tenant
+   * Get subscription status for tenant.
+   * Pass productSlug to scope the result to a specific product — required when
+   * a tenant holds subscriptions to multiple products simultaneously.
    */
-  async getSubscriptionStatus(): Promise<ApiResponse<SubscriptionStatus>> {
+  async getSubscriptionStatus(
+    productSlug?: string
+  ): Promise<ApiResponse<SubscriptionStatus>> {
     const params = new URLSearchParams({
       publicKey: this.publicKey,
       tenantId: this.tenantId,
     });
+
+    if (productSlug) params.set("productSlug", productSlug);
 
     return this.request<SubscriptionStatus>(
       `/api/public/subscriptions/status?${params}`
@@ -87,17 +91,33 @@ export class CrovverApiClient {
   }
 
   /**
-   * Check if tenant has access to a specific feature
+   * Check if tenant has access to a feature or product.
+   *
+   * Modes:
+   * - featureKey only   → feature flag + credit check on most recent active sub
+   * - featureKey + productSlug → feature flag check scoped to that product
+   * - productSlug only  → subscription-existence check (is tenant subscribed to this product?)
+   *
+   * At least one of featureKey or productSlug must be provided.
    */
   async checkFeatureAccess(
-    feature: string
+    featureKey?: string,
+    productSlug?: string
   ): Promise<ApiResponse<FeatureAccessResult>> {
-    const params = new URLSearchParams({
-      publicKey: this.publicKey,
-      featureKey: feature,
-      requestingEntityId: this.tenantId,
-    });
+    // publicKey must be a query param — authenticateRequest reads from searchParams, not body
+    const params = new URLSearchParams({ publicKey: this.publicKey });
 
-    return this.request<FeatureAccessResult>(`/api/public/can-access?${params}`);
+    return this.request<FeatureAccessResult>(
+      `/api/public/can-access?${params}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          requestingEntityId: this.tenantId,
+          ...(featureKey && { featureKey }),
+          ...(productSlug && { productSlug }),
+        }),
+      }
+    );
   }
 }
