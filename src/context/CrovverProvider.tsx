@@ -149,7 +149,7 @@ export function CrovverProvider({ children, config }: CrovverProviderProps) {
    * Uses public API to create checkout token directly
    */
   const redirectToCheckout = useCallback(
-    async (options?: { requiredFeature?: string; requiredPlan?: string }) => {
+    async (options?: { requiredFeature?: string; requiredPlan?: string; productSlug?: string }) => {
       try {
         // Call public API to get checkout token
         const response = await fetch(
@@ -167,6 +167,7 @@ export function CrovverProvider({ children, config }: CrovverProviderProps) {
               returnUrl: window.location.href,
               requiredFeature: options?.requiredFeature,
               requiredPlan: options?.requiredPlan,
+              productSlug: options?.productSlug,
               metadata,
             }),
           }

@@ -11,6 +11,7 @@ export interface UseBillingRedirectReturn {
   redirectToCheckout: (options?: {
     requiredFeature?: string;
     requiredPlan?: string;
+    productSlug?: string;
   }) => void;
   /** Redirect to billing portal */
   redirectToBilling: () => void;
@@ -38,7 +39,7 @@ export function useBillingRedirect(): UseBillingRedirectReturn {
   const { redirectToCheckout: checkout, redirectToPortal } = useCrovverContext();
 
   const redirectToCheckout = useCallback(
-    (options?: { requiredFeature?: string; requiredPlan?: string }) => {
+    (options?: { requiredFeature?: string; requiredPlan?: string; productSlug?: string }) => {
       checkout(options);
     },
     [checkout]
