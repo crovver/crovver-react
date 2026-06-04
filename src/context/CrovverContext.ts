@@ -26,6 +26,7 @@ export interface CrovverContextValue {
   redirectToCheckout: (options?: {
     requiredFeature?: string;
     requiredPlan?: string;
+    productSlug?: string;
   }) => void;
   redirectToPortal: () => void;
   refreshSubscription: () => Promise<void>;
