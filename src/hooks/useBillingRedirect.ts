@@ -15,6 +15,8 @@ export interface UseBillingRedirectReturn {
   }) => void;
   /** Redirect to billing portal */
   redirectToBilling: () => void;
+  /** Redirect an expired gateway subscription to the portal renewal page */
+  redirectToRenewal: (options?: { productSlug?: string }) => void;
   /** Is operation in progress */
   isRedirecting: boolean;
 }
@@ -36,7 +38,11 @@ export interface UseBillingRedirectReturn {
  * ```
  */
 export function useBillingRedirect(): UseBillingRedirectReturn {
-  const { redirectToCheckout: checkout, redirectToPortal } = useCrovverContext();
+  const {
+    redirectToCheckout: checkout,
+    redirectToPortal,
+    redirectToRenewal: renewal,
+  } = useCrovverContext();
 
   const redirectToCheckout = useCallback(
     (options?: { requiredFeature?: string; requiredPlan?: string; productSlug?: string }) => {
@@ -49,9 +55,17 @@ export function useBillingRedirect(): UseBillingRedirectReturn {
     redirectToPortal();
   }, [redirectToPortal]);
 
+  const redirectToRenewal = useCallback(
+    (options?: { productSlug?: string }) => {
+      renewal(options);
+    },
+    [renewal]
+  );
+
   return {
     redirectToCheckout,
     redirectToBilling,
+    redirectToRenewal,
     isRedirecting: false,
   };
 }

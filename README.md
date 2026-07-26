@@ -266,13 +266,56 @@ Trigger billing-related redirects manually.
 const {
   redirectToCheckout, // (options?) => void
   redirectToBilling, // () => void — opens billing portal
+  redirectToRenewal, // (options?) => void — renew an expired subscription
   isRedirecting, // true while redirect is in progress
 } = useBillingRedirect();
 
 // Go to checkout, hinting which plan/feature is needed
 redirectToCheckout({ requiredFeature: "advanced-analytics" });
 redirectToCheckout({ requiredPlan: "pro" });
+
+// Scope the pricing page to a single product (multi-product orgs)
+redirectToCheckout({ productSlug: "analytics" });
 ```
+
+**`redirectToCheckout` options:**
+
+| Option            | Type     | Description                                                                                      |
+| ----------------- | -------- | ------------------------------------------------------------------------------------------------ |
+| `requiredFeature` | `string` | Hints to the portal which feature the user is trying to access (shown as a banner on the pricing page) |
+| `requiredPlan`    | `string` | Hints which plan is required                                                                     |
+| `productSlug`     | `string` | Scopes the pricing page to a single product. Only plans belonging to that product are shown. Useful for multi-product orgs where each surface has its own plans. |
+
+---
+
+### Renewing a subscription
+
+Not every subscription renews automatically. Where it doesn't, one payment
+covers one billing interval and the customer pays again to extend it — so
+sending them to checkout is wrong, since they already have a subscription.
+`redirectToRenewal()` sends them to the portal's renewal page instead.
+
+`useSubscription()` reports which case applies via `renewal.method`:
+
+| `renewal.method` | Suggested action |
+| ---------------- | ---------------- |
+| `gateway`        | `redirectToRenewal()` |
+| `resubscribe`    | `redirectToCheckout()` |
+| `null`           | nothing to do |
+
+```tsx
+const { isActive, subscription } = useSubscription();
+const { redirectToRenewal } = useBillingRedirect();
+
+if (!isActive && subscription?.renewal?.method === "gateway") {
+  return <button onClick={() => redirectToRenewal()}>Renew now</button>;
+}
+```
+
+`renewal.providers` lists the payment providers available for the renewal.
+
+`Paywall` and `SubscriptionGate` already route their CTA by `renewal.method`, so
+this is only needed for custom paywall UI.
 
 ---
 

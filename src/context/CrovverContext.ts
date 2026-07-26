@@ -29,6 +29,12 @@ export interface CrovverContextValue {
     productSlug?: string;
   }) => void;
   redirectToPortal: () => void;
+  /**
+   * Redirect an expired manual/redirect-gateway subscription to the portal's
+   * renewal page (where the customer re-pays via ConnectIPS/eSewa/Khalti). Use
+   * when subscription.renewal?.method === "gateway".
+   */
+  redirectToRenewal: (options?: { productSlug?: string }) => void;
   refreshSubscription: () => Promise<void>;
 }
 
@@ -49,6 +55,7 @@ const NO_OP_CONTEXT: CrovverContextValue = {
   checkFeatureAccess: async () => false,
   redirectToCheckout: NOOP,
   redirectToPortal: NOOP,
+  redirectToRenewal: NOOP,
   refreshSubscription: NOOP_ASYNC,
 };
 

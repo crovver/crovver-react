@@ -63,11 +63,15 @@ function DefaultPaywallUI({
   onUpgrade,
   isRedirecting,
   style,
+  status,
 }: {
   onUpgrade: () => void;
   isRedirecting: boolean;
   style?: CSSProperties;
+  status?: string;
 }) {
+  const isExpired = status === "expired";
+
   return (
     <div style={{
       minHeight: "100vh", display: "flex", alignItems: "center",
@@ -146,6 +150,8 @@ function DefaultPaywallUI({
               }} />
               Redirecting to plans…
             </>
+          ) : isExpired ? (
+            "Renew Plan →"
           ) : (
             "View Plans & Pricing →"
           )}
@@ -188,12 +194,40 @@ export function Paywall({
   loadingComponent,
   style,
 }: PaywallProps) {
-  const { isLoading, isActive, redirectToCheckout } = useCrovverContext();
+  const {
+    isLoading,
+    isActive,
+    redirectToCheckout,
+    redirectToRenewal,
+    redirectToPortal,
+    subscription,
+  } = useCrovverContext();
   const [isRedirecting, setIsRedirecting] = useState(false);
 
-  const handleUpgrade = () => {
+  const status = subscription?.status;
+  const planName = subscription?.plan?.name;
+
+  // Route the CTA by the API's renewal hint: an expired manual/redirect-gateway
+  // sub goes to RENEWAL (checkout would hit the one-active-sub-per-product guard);
+  // a recurring card failure goes to the portal to update payment; everything
+  // else is a fresh checkout.
+  const handleUpgrade = async () => {
     setIsRedirecting(true);
-    redirectToCheckout();
+    const method = subscription?.renewal?.method;
+    try {
+      if (method === "gateway") {
+        await redirectToRenewal();
+      } else if (method === "stripe_update") {
+        await redirectToPortal();
+      } else {
+        // For expired subs, pre-select their current plan so they don't have to pick again
+        await redirectToCheckout(
+          status === "expired" && planName ? { requiredPlan: planName } : undefined
+        );
+      }
+    } finally {
+      // Keep isRedirecting=true since we're navigating away
+    }
   };
 
   // Auto-redirect when subscription check finishes
@@ -217,6 +251,7 @@ export function Paywall({
         onUpgrade={handleUpgrade}
         isRedirecting={isRedirecting}
         style={style}
+        status={status}
       />
     );
   }
