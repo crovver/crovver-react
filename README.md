@@ -300,7 +300,6 @@ sending them to checkout is wrong, since they already have a subscription.
 | `renewal.method` | Suggested action |
 | ---------------- | ---------------- |
 | `gateway`        | `redirectToRenewal()` |
-| `stripe_update`  | `redirectToBilling()` |
 | `resubscribe`    | `redirectToCheckout()` |
 | `null`           | nothing to do |
 

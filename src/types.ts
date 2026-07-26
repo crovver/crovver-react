@@ -19,13 +19,12 @@ export interface CrovverConfig {
 
 export interface SubscriptionStatus {
   active: boolean;
-  status: "active" | "trialing" | "past_due" | "canceled" | "expired" | "none";
+  status: "active" | "trial" | "past_due" | "pending_cancel" | "canceled" | "expired" | "none";
   /**
-   * Recovery hint for a non-active subscription so the UI can show the right CTA:
-   *   gateway       → expired manual/redirect-gateway sub → re-pay (redirectToRenewal)
-   *   stripe_update → recurring card failure → update payment method (redirectToPortal)
-   *   resubscribe   → canceled → start a fresh checkout (redirectToCheckout)
-   *   null          → nothing to do (active / trialing / never subscribed)
+   * How a non-active subscription can be recovered, so the UI shows the right CTA:
+   *   gateway     → pay again (redirectToRenewal)
+   *   resubscribe → start a fresh checkout (redirectToCheckout)
+   *   null        → nothing to do
    */
   renewal?: {
     supported: boolean;
@@ -51,6 +50,9 @@ export interface SubscriptionStatus {
   plan: {
     id: string;
     name: string;
+    productId: string | null;
+    productName: string | null;
+    productSlug: string | null;
     billingInterval: string;
     features: string[];
     isSeatBased?: boolean;
@@ -60,7 +62,8 @@ export interface SubscriptionStatus {
 
 export interface FeatureAccessResult {
   canAccess: boolean;
-  featureKey: string;
+  featureKey?: string;
+  productSlug?: string;
   requestingEntityId: string;
 }
 

@@ -22,7 +22,7 @@ export interface CrovverContextValue {
   // Helper functions
   isActive: boolean;
   hasFeature: (feature: string) => boolean;
-  checkFeatureAccess: (feature: string) => Promise<boolean>;
+  checkFeatureAccess: (feature?: string, productSlug?: string) => Promise<boolean>;
   redirectToCheckout: (options?: {
     requiredFeature?: string;
     requiredPlan?: string;

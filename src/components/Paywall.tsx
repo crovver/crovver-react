@@ -27,31 +27,29 @@ export interface PaywallProps {
   style?: CSSProperties;
 }
 
+const SPIN_KEYFRAMES = `@keyframes crovver-spin { to { transform: rotate(360deg); } }`;
+const ACCENT = "#006d6f";
+const ACCENT_HOVER = "#005759";
+const ACCENT_LIGHT = "#e6f4f4";
+
 // ─── Default Loading UI ───────────────────────────────────────────────────────
 
 function DefaultLoading() {
-  const containerStyle: CSSProperties = {
-    minHeight: "100vh",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    background: "#f9fafb",
-  };
-  const spinnerStyle: CSSProperties = {
-    width: 40,
-    height: 40,
-    border: "3px solid #e5e7eb",
-    borderTop: "3px solid #4f46e5",
-    borderRadius: "50%",
-    animation: "crovver-spin 0.8s linear infinite",
-  };
-
   return (
-    <div style={containerStyle}>
-      <style>{`@keyframes crovver-spin { to { transform: rotate(360deg); } }`}</style>
+    <div style={{
+      minHeight: "100vh", display: "flex", alignItems: "center",
+      justifyContent: "center", background: "#f5f5f3",
+      fontFamily: "-apple-system, BlinkMacSystemFont, 'Inter', sans-serif",
+    }}>
+      <style>{SPIN_KEYFRAMES}</style>
       <div style={{ textAlign: "center" }}>
-        <div style={spinnerStyle} />
-        <p style={{ marginTop: 12, color: "#6b7280", fontSize: 14 }}>
+        <div style={{
+          width: 36, height: 36, margin: "0 auto",
+          border: "3px solid #e5e5e2",
+          borderTopColor: ACCENT, borderRightColor: ACCENT,
+          borderRadius: "50%", animation: "crovver-spin 0.7s linear infinite",
+        }} />
+        <p style={{ marginTop: 14, color: "#9a9a94", fontSize: 13.5, fontWeight: 500 }}>
           Checking subscription…
         </p>
       </div>
@@ -73,120 +71,84 @@ function DefaultPaywallUI({
   status?: string;
 }) {
   const isExpired = status === "expired";
-  const containerStyle: CSSProperties = {
-    minHeight: "100vh",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    background: "linear-gradient(135deg, #eff6ff 0%, #eef2ff 100%)",
-    padding: "2rem",
-  };
-
-  const cardStyle: CSSProperties = {
-    background: "#fff",
-    borderRadius: 16,
-    padding: "3rem 2.5rem",
-    maxWidth: 480,
-    width: "100%",
-    textAlign: "center",
-    boxShadow: "0 20px 60px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04)",
-    ...style,
-  };
-
-  const iconWrapStyle: CSSProperties = {
-    width: 72,
-    height: 72,
-    background: "#eef2ff",
-    borderRadius: "50%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    margin: "0 auto 1.5rem",
-  };
-
-  const buttonStyle: CSSProperties = {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    width: "100%",
-    padding: "0.875rem 1.5rem",
-    background: isRedirecting ? "#a5b4fc" : "#4f46e5",
-    color: "#fff",
-    border: "none",
-    borderRadius: 10,
-    fontSize: 16,
-    fontWeight: 600,
-    cursor: isRedirecting ? "not-allowed" : "pointer",
-    transition: "background 0.2s",
-    marginTop: "1.5rem",
-  };
 
   return (
-    <div style={containerStyle}>
-      <div style={cardStyle}>
-        <div style={iconWrapStyle}>
-          <svg
-            width="32"
-            height="32"
-            fill="none"
-            stroke="#4f46e5"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            viewBox="0 0 24 24"
-          >
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+    <div style={{
+      minHeight: "100vh", display: "flex", alignItems: "center",
+      justifyContent: "center", background: "#f5f5f3", padding: "24px",
+      fontFamily: "-apple-system, BlinkMacSystemFont, 'Inter', sans-serif",
+    }}>
+      <style>{SPIN_KEYFRAMES}</style>
+
+      <div style={{
+        background: "#fff",
+        borderRadius: 18,
+        padding: "48px 40px",
+        maxWidth: 440, width: "100%",
+        textAlign: "center",
+        boxShadow: "0 8px 40px rgba(0,0,0,0.10), 0 0 0 1px rgba(0,0,0,0.04)",
+        ...style,
+      }}>
+        {/* Icon */}
+        <div style={{
+          width: 68, height: 68, borderRadius: "50%",
+          background: ACCENT_LIGHT,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          margin: "0 auto 24px",
+        }}>
+          <svg width="30" height="30" fill="none" stroke={ACCENT}
+            strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+            <rect x="3" y="11" width="18" height="11" rx="2" />
             <path d="M7 11V7a5 5 0 0 1 10 0v4" />
           </svg>
         </div>
 
-        <h1
-          style={{
-            fontSize: 26,
-            fontWeight: 700,
-            color: "#111827",
-            margin: "0 0 0.75rem",
-          }}
-        >
-          {isExpired ? "Your Subscription Has Expired" : "Subscription Required"}
+        {/* Badge */}
+        <div style={{
+          display: "inline-flex", alignItems: "center", gap: 6,
+          background: ACCENT_LIGHT, borderRadius: 9999,
+          padding: "4px 12px", marginBottom: 16,
+        }}>
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: ACCENT, display: "inline-block" }} />
+          <span style={{ fontSize: 12, fontWeight: 700, color: ACCENT, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+            Subscription Required
+          </span>
+        </div>
+
+        <h1 style={{ fontSize: 24, fontWeight: 700, color: "#1a1a1a", margin: "0 0 10px", letterSpacing: "-0.03em" }}>
+          Unlock full access
         </h1>
 
-        <p
-          style={{
-            fontSize: 15,
-            color: "#6b7280",
-            lineHeight: 1.6,
-            margin: "0 0 0.5rem",
-          }}
-        >
-          {isExpired
-            ? "Your subscription has expired. Renew to continue accessing all features."
-            : "You need an active subscription to access this content."}
-        </p>
-        <p style={{ fontSize: 14, color: "#9ca3af", margin: 0 }}>
-          {isExpired ? "Pick up right where you left off." : "Choose a plan to unlock all features."}
+        <p style={{ fontSize: 14.5, color: "#5c5c58", lineHeight: 1.65, margin: "0 0 32px", maxWidth: 320, marginLeft: "auto", marginRight: "auto" }}>
+          You need an active subscription to access this content.
+          Choose a plan to get started.
         </p>
 
+        {/* CTA */}
         <button
-          style={buttonStyle}
           onClick={onUpgrade}
           disabled={isRedirecting}
+          style={{
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+            width: "100%", padding: "13px 24px",
+            background: isRedirecting ? "#52a8aa" : ACCENT,
+            color: "#fff", border: "none", borderRadius: 10,
+            fontSize: 15, fontWeight: 600,
+            cursor: isRedirecting ? "not-allowed" : "pointer",
+            transition: "background 0.15s", letterSpacing: "-0.01em",
+          }}
+          onMouseEnter={e => { if (!isRedirecting) (e.currentTarget as HTMLButtonElement).style.background = ACCENT_HOVER; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = isRedirecting ? "#52a8aa" : ACCENT; }}
         >
           {isRedirecting ? (
             <>
-              <span
-                style={{
-                  width: 16,
-                  height: 16,
-                  border: "2px solid rgba(255,255,255,0.4)",
-                  borderTop: "2px solid #fff",
-                  borderRadius: "50%",
-                  display: "inline-block",
-                  animation: "crovver-spin 0.8s linear infinite",
-                }}
-              />
-              Redirecting…
+              <span style={{
+                width: 15, height: 15, flexShrink: 0,
+                border: "2px solid rgba(255,255,255,0.4)",
+                borderTopColor: "#fff", borderRadius: "50%",
+                display: "inline-block", animation: "crovver-spin 0.7s linear infinite",
+              }} />
+              Redirecting to plans…
             </>
           ) : isExpired ? (
             "Renew Plan →"
@@ -195,7 +157,10 @@ function DefaultPaywallUI({
           )}
         </button>
 
-        <style>{`@keyframes crovver-spin { to { transform: rotate(360deg); } }`}</style>
+        <p style={{ marginTop: 16, fontSize: 12.5, color: "#9a9a94" }}>
+          Powered by{" "}
+          <span style={{ fontWeight: 700, color: ACCENT, letterSpacing: "-0.02em" }}>Crovver</span>
+        </p>
       </div>
     </div>
   );

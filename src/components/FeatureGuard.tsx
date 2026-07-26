@@ -46,10 +46,9 @@ export function FeatureGuard({
   children,
 }: FeatureGuardProps) {
   const resolvedFeature = (feature || featureKey) ?? "";
-  const { hasAccess, isLoading } = useFeatureAccess(
-    resolvedFeature,
-    checkRemote
-  );
+  const { hasAccess, isLoading } = useFeatureAccess(resolvedFeature, {
+    checkRemote,
+  });
 
   if (isLoading) {
     return <>{loadingComponent}</>;

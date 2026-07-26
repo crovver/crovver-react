@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - `redirectToRenewal()` on `useBillingRedirect()` and the Crovver context — sends a subscription that must be paid again to the portal's renewal page.
-- `renewal` on the subscription status: `{ supported, method, providers? }`, where `method` is `gateway` | `stripe_update` | `resubscribe` | `null`.
+- `renewal` on the subscription status: `{ supported, method, providers? }`, where `method` is `gateway` | `stripe_update` | `resubscribe` | `null`. Only the `gateway` path is verified end-to-end so far.
 
 ### Changed
 - `Paywall` and `SubscriptionGate` route their inactive-state CTA by `renewal.method`, so a subscription needing re-payment goes to renewal instead of checkout. `useFeatureAccess` still uses checkout — a feature upgrade is a plan change, not a renewal.
