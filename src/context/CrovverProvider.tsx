@@ -187,6 +187,55 @@ export function CrovverProvider({ children, config }: CrovverProviderProps) {
   );
 
   /**
+   * Redirect an expired manual/redirect-gateway subscription to the portal's
+   * renewal page. Mints a checkout token (same as redirectToCheckout) but lands
+   * on /renew, where the customer re-pays via ConnectIPS/eSewa/Khalti (and can
+   * adjust seats for seat-based plans). Use when
+   * subscription.renewal?.method === "gateway".
+   */
+  const redirectToRenewal = useCallback(
+    async (options?: { productSlug?: string }) => {
+      try {
+        const response = await fetch(
+          `${apiUrl}/api/public/auth/checkout-token`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-public-key": publicKey,
+            },
+            body: JSON.stringify({
+              externalTenantId: tenantId,
+              externalUserId: userId,
+              externalTenantName: tenantName,
+              returnUrl: window.location.href,
+              productSlug: options?.productSlug,
+              metadata,
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to create renewal token");
+        }
+
+        const data = await response.json();
+
+        if (data.success && data.data?.token) {
+          window.location.href = `${portalUrl}/renew?token=${data.data.token}`;
+        } else {
+          throw new Error("Invalid token response");
+        }
+      } catch (err) {
+        console.error("[Crovver SDK] Renewal redirect failed:", err);
+        // Fallback: the portal billing page also surfaces renewal.
+        window.location.href = `${portalUrl}/billing`;
+      }
+    },
+    [tenantId, portalUrl, apiUrl, publicKey, userId, tenantName, metadata]
+  );
+
+  /**
    * Redirect user to self-service billing portal
    * Uses public API to create portal token directly
    */
@@ -267,6 +316,7 @@ export function CrovverProvider({ children, config }: CrovverProviderProps) {
     checkFeatureAccess,
     redirectToCheckout,
     redirectToPortal,
+    redirectToRenewal,
     refreshSubscription,
   };
 

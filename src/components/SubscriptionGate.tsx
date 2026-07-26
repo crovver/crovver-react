@@ -21,9 +21,20 @@ export function SubscriptionGate({
 }: SubscriptionGateProps) {
   const { subscription, isLoading, isActive } = useSubscription();
   const { redirectToCheckout, isRedirecting } = useBillingRedirect();
-  const { config } = useCrovverContext();
+  const { config, redirectToRenewal, redirectToPortal } = useCrovverContext();
 
   const portalUrl = config.portalUrl || CROVVER_URL.PORTAL;
+
+  // Pick the recovery CTA from the API's renewal hint: an expired gateway sub
+  // re-pays (renewal), a recurring card failure updates payment (portal),
+  // everything else starts a fresh checkout.
+  const renewalMethod = subscription?.renewal?.method;
+  const primaryCta =
+    renewalMethod === "gateway"
+      ? { label: "Renew now →", action: () => redirectToRenewal() }
+      : renewalMethod === "stripe_update"
+        ? { label: "Update payment method →", action: () => redirectToPortal() }
+        : { label: "View Plans & Pricing →", action: () => redirectToCheckout() };
 
   // Show loading state
   if (isLoading) {
@@ -100,7 +111,7 @@ export function SubscriptionGate({
             {/* CTA Buttons */}
             <div className="space-y-3">
               <button
-                onClick={() => redirectToCheckout()}
+                onClick={() => primaryCta.action()}
                 disabled={isRedirecting}
                 className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-semibold text-lg px-8 py-4 rounded-lg transition-colors disabled:cursor-not-allowed flex items-center justify-center"
               >
@@ -110,7 +121,7 @@ export function SubscriptionGate({
                     Redirecting...
                   </>
                 ) : (
-                  <>View Plans & Pricing →</>
+                  <>{primaryCta.label}</>
                 )}
               </button>
 

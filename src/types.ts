@@ -20,6 +20,19 @@ export interface CrovverConfig {
 export interface SubscriptionStatus {
   active: boolean;
   status: "active" | "trialing" | "past_due" | "canceled" | "expired" | "none";
+  /**
+   * Recovery hint for a non-active subscription so the UI can show the right CTA:
+   *   gateway       → expired manual/redirect-gateway sub → re-pay (redirectToRenewal)
+   *   stripe_update → recurring card failure → update payment method (redirectToPortal)
+   *   resubscribe   → canceled → start a fresh checkout (redirectToCheckout)
+   *   null          → nothing to do (active / trialing / never subscribed)
+   */
+  renewal?: {
+    supported: boolean;
+    method: "gateway" | "stripe_update" | "resubscribe" | null;
+    /** Payment providers available for this renewal. */
+    providers?: string[];
+  };
   tenant: {
     id: string;
     name: string;

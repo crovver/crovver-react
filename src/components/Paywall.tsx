@@ -65,11 +65,14 @@ function DefaultPaywallUI({
   onUpgrade,
   isRedirecting,
   style,
+  status,
 }: {
   onUpgrade: () => void;
   isRedirecting: boolean;
   style?: CSSProperties;
+  status?: string;
 }) {
+  const isExpired = status === "expired";
   const containerStyle: CSSProperties = {
     minHeight: "100vh",
     display: "flex",
@@ -146,7 +149,7 @@ function DefaultPaywallUI({
             margin: "0 0 0.75rem",
           }}
         >
-          Subscription Required
+          {isExpired ? "Your Subscription Has Expired" : "Subscription Required"}
         </h1>
 
         <p
@@ -157,10 +160,12 @@ function DefaultPaywallUI({
             margin: "0 0 0.5rem",
           }}
         >
-          You need an active subscription to access this content.
+          {isExpired
+            ? "Your subscription has expired. Renew to continue accessing all features."
+            : "You need an active subscription to access this content."}
         </p>
         <p style={{ fontSize: 14, color: "#9ca3af", margin: 0 }}>
-          Choose a plan to unlock all features.
+          {isExpired ? "Pick up right where you left off." : "Choose a plan to unlock all features."}
         </p>
 
         <button
@@ -183,6 +188,8 @@ function DefaultPaywallUI({
               />
               Redirecting…
             </>
+          ) : isExpired ? (
+            "Renew Plan →"
           ) : (
             "View Plans & Pricing →"
           )}
@@ -222,13 +229,37 @@ export function Paywall({
   loadingComponent,
   style,
 }: PaywallProps) {
-  const { isLoading, isActive, redirectToCheckout } = useCrovverContext();
+  const {
+    isLoading,
+    isActive,
+    redirectToCheckout,
+    redirectToRenewal,
+    redirectToPortal,
+    subscription,
+  } = useCrovverContext();
   const [isRedirecting, setIsRedirecting] = useState(false);
 
+  const status = subscription?.status;
+  const planName = subscription?.plan?.name;
+
+  // Route the CTA by the API's renewal hint: an expired manual/redirect-gateway
+  // sub goes to RENEWAL (checkout would hit the one-active-sub-per-product guard);
+  // a recurring card failure goes to the portal to update payment; everything
+  // else is a fresh checkout.
   const handleUpgrade = async () => {
     setIsRedirecting(true);
+    const method = subscription?.renewal?.method;
     try {
-      await redirectToCheckout();
+      if (method === "gateway") {
+        await redirectToRenewal();
+      } else if (method === "stripe_update") {
+        await redirectToPortal();
+      } else {
+        // For expired subs, pre-select their current plan so they don't have to pick again
+        await redirectToCheckout(
+          status === "expired" && planName ? { requiredPlan: planName } : undefined
+        );
+      }
     } finally {
       // Keep isRedirecting=true since we're navigating away
     }
@@ -255,6 +286,7 @@ export function Paywall({
         onUpgrade={handleUpgrade}
         isRedirecting={isRedirecting}
         style={style}
+        status={status}
       />
     );
   }
