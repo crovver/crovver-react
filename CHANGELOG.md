@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Added
+
+- `SubscriptionStatus.plan.seatTiers` (`PlanSeatTier`): the seat bands of a tiered plan in the subscription's currency. A band's price is the whole period's price for any seat count in its range. Checkout and the billing portal already price tiers; this only exposes them to your UI.
+
 ## [1.7.0] - 2026-07-26
 
 ### Added

@@ -42,6 +42,7 @@ export type {
   PortalTokenResponse,
   CrovverError,
   ApiResponse,
+  PlanSeatTier,
 } from "./types";
 
 // API Client (advanced use cases)
