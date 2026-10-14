@@ -57,7 +57,22 @@ export interface SubscriptionStatus {
     features: string[];
     isSeatBased?: boolean;
     limits: Record<string, any>;
+    /**
+     * Tiered seat plans: the bands in the subscription's currency; empty otherwise. A band's price is
+     * the whole period's price for any seat count in its range. See {@link PlanSeatTier}.
+     */
+    seatTiers?: PlanSeatTier[];
   } | null;
+}
+
+/** One seat band of a tiered plan — a flat price for the whole `[minQuantity, maxQuantity]` range. */
+export interface PlanSeatTier {
+  currency: string;
+  minQuantity: number;
+  /** `null` for the open top band */
+  maxQuantity: number | null;
+  /** Two-decimal string, e.g. "250.00" */
+  price: string;
 }
 
 export interface FeatureAccessResult {
