@@ -2,7 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [2.0.0] - Unreleased
+
+The SDK for the revamped Crovver server. Release only after that server release: an older server sends no `seatTiers`.
+
+### Removed (breaking)
+
+- `config.metadata.userId` on `CrovverProvider`. Pass `config.userId` at the top level; the nested value is no longer read.
 
 ### Added
 

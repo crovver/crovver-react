@@ -40,8 +40,6 @@ export interface CrovverProviderProps {
     metadata?: {
       userEmail?: string;
       userName?: string;
-      /** @deprecated Pass userId at the top level instead */
-      userId?: string;
     };
   };
   children: ReactNode;
@@ -57,12 +55,10 @@ export function CrovverProvider({ children, config }: CrovverProviderProps) {
     pollInterval,
     debug = false,
     onUnauthenticated,
-    userId: userIdProp,
+    userId,
     metadata,
     tenantName,
   } = config;
-
-  const userId = userIdProp ?? metadata?.userId;
 
   // State
   const [subscription, setSubscription] = useState<SubscriptionStatus | null>(
