@@ -128,7 +128,7 @@ Root provider. Wrap your app (or the section that needs subscription awareness) 
 </CrovverProvider>
 ```
 
-**`userId`** is the ID of the currently logged-in user in your system. It is used by Crovver to deduplicate `tenant_owner` records across checkout sessions. Pass it at the top level — `metadata.userId` still works but is deprecated.
+**`userId`** is the ID of the currently logged-in user in your system. It is used by Crovver to deduplicate `tenant_owner` records across checkout sessions. Pass it at the top level.
 
 ---
 
